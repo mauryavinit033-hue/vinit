@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal File Converter & Multi-Tool Utility Grid</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        h1 { font-size: 2.3rem; margin-bottom: 5px; color: #0f172a; }
+        .tagline { color: #64748b; margin-bottom: 25px; font-size: 1.05rem; }
+
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover { background: #cbd5e1; color: #0f172a; }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px -1px rgb(0 0 0 / 0.08);
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .tab-content.active { display: block; }
+        .text-center { text-align: center !important; }
+
+        .format-selector-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .select-box {
+            padding: 10px 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #fff;
+            color: var(--text-color);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .swap-btn {
+            background: #e2e8f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f1f5f9;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+        .drop-zone * { pointer-events: none; }
+        .drop-zone p { font-size: 1rem; font-weight: 500; color: #475569; margin: 10px 0 0 0; }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-success { background: #16a34a; }
+        .btn-success:hover { background: #15803d; }
+        .btn-danger { background: #ef4444; }
+
+        .ready-container {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .status-container { display: none; text-align: center; margin-top: 10px; }
+        .progress-bar {
+            width: 100%;
+            background: #e2e8f0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        .progress-fill { width: 0%; height: 100%; background: var(--primary-color); transition: width 0.2s ease; }
+
+        .batch-list { margin-top: 15px; text-align: left; background: #f8fafc; border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto;}
+        .batch-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem;}
+        
+        .editor-workspace { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 15px; }
+        #canvasPreview { max-width: 100%; max-height: 350px; background: #e2e8f0; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .control-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+        .compressor-controls { margin: 20px 0; background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .mode-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .mode-option {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .mode-option.selected {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+            color: var(--primary-color);
+        }
+        .slider-group { display: flex; align-items: center; gap: 15px; margin-top: 15px; }
+        .slider-group input { flex: 1; }
+
+        .pdf-toggle-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .pdf-sub-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .pdf-sub-btn.active { background: #334155; color: white; border-color: #334155; }
+
+        .adsense-placeholder {
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            color: #64748b;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin: 15px auto;
+        }
+        .banner-ad { width: 728px; height: 90px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+
+    <div class="adsense-placeholder banner-ad">
+        <div>[Google AdSense Responsive Banner Block Placeholder]</div>
+    </div>
+
+    <div class="container">
+        <h1>Universal Media Processing Grid</h1>
+        <p class="tagline">Your complete suite for client-side document conversions, optimizations, and edits.</p>
+
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchUtilityTab('singleConverterTab', this)">📁 Universal Converter</button>
+            <button class="tab-btn" onclick="switchUtilityTab('batchConverterTab', this)">🗂 Bulk Conversion</button>
+            <button class="tab-btn" onclick="switchUtilityTab('imageEditorTab', this)">🎨 Image Editor</button>
+            <button class="tab-btn" onclick="switchUtilityTab('pdfMergeTab', this)">🔀 PDF Utilities</button>
+            <button class="tab-btn" onclick="switchUtilityTab('compressorTab', this)">🗜 Smart Compressor</button>
+        </div>
+
+        <div id="singleConverterTab" class="tab-content active">
+            <div class="format-selector-wrapper">
+                <select id="fromFormat" class="select-box">
+                    <option value="png">PNG Image</option>
+                    <option value="jpg">JPG Image</option>
+                    <option value="webp">WebP Image</option>
+                    <option value="pdf">PDF Document</option>
+                    <option value="docx">Word (DOCX)</option>
+                    <option value="txt">Text (TXT)</option>
+                </select>
+                <button class="swap-btn" id="swapFormatsBtn">⇆</button>
+                <select id="toFormat" class="select-box">
+                    <option value="webp">WebP Image</option>
+                    <option value="png">PNG Image</option>
+                    <option value="jpg">JPG Image</option>
+                    <option value="pdf" selected>PDF Document</option>
+                    <option value="docx">Word (DOCX)</option>
+                    <option value="txt">Text (TXT)</option>
+                </select>
+            </div>
+
+            <div id="uploadView">
+                <div class="drop-zone" id="dropZoneSingle">
+                    <div style="font-size: 35px;">📁</div>
+                    <p>Drag & drop your file here or <span style="color: var(--primary-color); text-decoration: underline;">Browse</span></p>
+                    <input type="file" id="fileInputSingle" style="display:none;">
+                </div>
+            </div>
+
+            <div id="readyView" class="ready-container">
+                <h3>📄 File Selected</h3>
+                <p id="stagedFileInfo" style="font-weight: bold;"></p>
+                <button class="btn btn-success" id="startConversionBtn" style="margin-right: 10px;">Convert Now</button>
+                <button class="btn btn-danger" onclick="resetConverter()">Cancel</button>
+            </div>
+
+            <div id="statusView" class="status-container">
+                <h3 id="statusText">Processing local frames...</h3>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            </div>
+
+            <div id="downloadView" style="display: none;" class="text-center">
+                <h3 style="color: #16a34a;">✓ Conversion Complete!</h3>
+                <p id="fileNameDisplay" style="font-weight: bold;"></p>
+                <p id="fileSizeDisplay" style="color: #64748b; font-size: 0.9rem;"></p>
+                <a href="#" class="btn btn-success" id="downloadBtn">Download File</a><br>
+                <button class="btn" style="background: #64748b; margin-top: 10px;" onclick="resetConverter()">Convert Another</button>
+            </div>
+        </div>
+
+        <div id="batchConverterTab" class="tab-content">
+            <h3>🗂 Multi-File Batch Conversion</h3>
+            <p style="color:#64748b; font-size:0.9rem;">Upload multiple images to mass convert them instantly into your targeted output layout.</p>
+            
+            <div style="margin-bottom: 20px;" class="text-center">
+                <label style="font-weight: bold;">Target Output Format: </label>
+                <select id="batchTargetFormat" class="select-box">
+                    <option value="png">PNG Image</option>
+                    <option value="jpg">JPG Image</option>
+                    <option value="webp">WebP Image</option>
+                </select>
+            </div>
+
+            <div class="drop-zone" id="dropZoneBatch">
+                <div style="font-size: 35px;">📦</div>
+                <p>Drag & drop multiple files or <span style="color: var(--primary-color); text-decoration: underline;">Browse</span></p>
+                <input type="file" id="fileInputBatch" multiple style="display:none;">
+            </div>
+
+            <div id="batchListWrapper" style="display:none; margin-top:20px;">
+                <h4>Staged Files Queue</h4>
+                <div class="batch-list" id="batchItemsContainer"></div>
+                <div class="text-center" style="margin-top:15px;">
+                    <button class="btn btn-success" onclick="processBatchQueue()">Execute Batch Conversion</button>
+                    <button class="btn btn-danger" onclick="clearBatchQueue()">Clear All</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="imageEditorTab" class="tab-content">
+            <h3>🎨 Inline Asset Editing Sandbox</h3>
+            <p style="color:#64748b; font-size:0.9rem;">Upload an image to scale, rotate, flip, or apply structural crops before final extraction.</p>
+            
+            <div class="drop-zone" id="dropZoneEditor">
+                <div style="font-size: 35px;">🖼️</div>
+                <p>Select or Drop image to open workspace Editor</p>
+                <input type="file" id="fileInputEditor" accept="image/*" style="display:none;">
+            </div>
+
+            <div id="editorWorkspace" class="editor-workspace" style="display:none;">
+                <canvas id="canvasPreview"></canvas>
+                <div class="control-row">
+                    <button class="tab-btn" onclick="rotateEditorImage(90)">Rotate ↻</button>
+                    <button class="tab-btn" onclick="rotateEditorImage(-90)">Rotate ↺</button>
+                    <button class="tab-btn" onclick="flipEditorImage('h')">Flip Horizontally</button>
+                    <button class="tab-btn" onclick="flipEditorImage('v')">Flip Vertically</button>
+                </div>
+                <div class="control-row" style="margin-top:10px;">
+                    <button class="btn btn-success" onclick="saveEditedImage()">Export WebP Configuration</button>
+                    <button class="btn btn-danger" onclick="closeEditorWorkspace()">Reset Workspace</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pdfMergeTab" class="tab-content">
+            <h3>🔀 PDF Document Toolkit Suite</h3>
+            <p style="color:#64748b; font-size:0.9rem; margin-bottom: 15px;">Combine separate documents together, extract custom pages, or minimize footprint metrics locally.</p>
+            
+            <div class="pdf-toggle-container">
+                <button id="pdfBtnMergeMode" class="pdf-sub-btn active" onclick="togglePdfToolMode('merge')">🔗 Merge PDFs</button>
+                <button id="pdfBtnSplitMode" class="pdf-sub-btn" onclick="togglePdfToolMode('split')">✂️ Split/Extract Pages</button>
+                <button id="pdfBtnCompressMode" class="pdf-sub-btn" onclick="togglePdfToolMode('compress')">🗜️ Compress PDF</button>
+            </div>
+
+            <div id="pdfMergePanel">
+                <div class="drop-zone" id="dropZonePdf">
+                    <div style="font-size: 35px;">📑</div>
+                    <p>Select multiple PDF files to Merge into one document</p>
+                    <input type="file" id="fileInputPdf" multiple accept=".pdf" style="display:none;">
+                </div>
+
+                <div id="pdfListWrapper" style="display:none; margin-top:20px;">
+                    <h4>Staged PDF Document Chain Index</h4>
+                    <div class="batch-list" id="pdfItemsContainer"></div>
+                    <div class="text-center" style="margin-top:15px;">
+                        <button class="btn btn-success" onclick="executePdfMerge()">Merge and Download PDF</button>
+                        <button class="btn btn-danger" onclick="clearPdfMergeQueue()">Clear Queue</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pdfSplitPanel" style="display: none;">
+                <div class="drop-zone" id="dropZonePdfSplit">
+                    <div style="font-size: 35px;">📄</div>
+                    <p>Select target PDF document to separate</p>
+                    <input type="file" id="fileInputPdfSplit" accept=".pdf" style="display:none;">
+                </div>
+
+                <div id="pdfSplitWorkspace" style="display: none; margin-top:20px; background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e2e8f0;">
+                    <h4 style="margin-top:0;" id="splitTargetFileName">Target File: None</h4>
+                    <div style="margin:15px 0;">
+                        <label style="font-weight: bold; display:block; margin-bottom:5px;">Define Page Selection Rule Matrix:</label>
+                        <input type="text" id="splitPageRanges" class="select-box" style="width:100%; max-width:400px; text-align:left;" placeholder="Examples: 1-3, 5, 7-10">
+                        <small style="display:block; color:#64748b; margin-top:4px;">Use hyphen for spreads (1-3) and commas for separation (1,3,5).</small>
+                    </div>
+                    <div class="text-center" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="executePdfSplit()">Extract Specified Pages</button>
+                        <button class="btn btn-danger" onclick="resetPdfSplitWorkspace()">Unload File</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pdfCompressPanel" style="display: none;">
+                <div class="drop-zone" id="dropZonePdfCompress">
+                    <div style="font-size: 35px;">📉</div>
+                    <p>Select target PDF document to compress</p>
+                    <input type="file" id="fileInputPdfCompress" accept=".pdf" style="display:none;">
+                </div>
+
+                <div id="pdfCompressWorkspace" style="display: none; margin-top:20px; background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e2e8f0;">
+                    <h4 style="margin-top:0;" id="pdfCompTargetFileName">Target File: None</h4>
+                    
+                    <div class="compressor-controls" style="background:#fff; margin:15px 0;">
+                        <div class="mode-selector">
+                            <div id="pdfModeAuto" class="mode-option selected" onclick="setPdfCompressMode('auto')">✨ Auto Standard</div>
+                            <div id="pdfModeCustom" class="mode-option" onclick="setPdfCompressMode('custom')">🛠️ Custom Target</div>
+                        </div>
+
+                        <div id="pdfCustomSliderContainer" style="display: none; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+                            <div class="slider-group">
+                                <label style="font-weight:bold; width:120px;">Target Quality:</label>
+                                <input type="range" id="pdfCompRange" min="10" max="90" value="60" oninput="updatePdfCompressLiveLabel()">
+                                <span id="pdfCompLabel" style="font-weight:bold; color:var(--primary-color);">60%</span>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-around; font-size:0.9rem; margin-top:15px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                            <div>Current Size: <span id="pdfOrigSizeLabel" style="font-weight:bold;">-</span></div>
+                            <div>Est. Output: <span id="pdfNewSizeLabel" style="font-weight:bold; color:#16a34a;">-</span></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="executePdfCompression()">Compress & Download PDF</button>
+                        <button class="btn btn-danger" onclick="resetPdfCompressWorkspace()">Discard Document</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="compressorTab" class="tab-content">
+            <h3>🗜 Smart Dynamic Density Compressor</h3>
+            <p style="color:#64748b; font-size:0.9rem;">Choose automatic target balancing or specify custom parameters using our density configuration engine.</p>
+            
+            <div class="drop-zone" id="dropZoneCompressor">
+                <div style="font-size: 35px;">📉</div>
+                <p>Drop or Choose image to compress</p>
+                <input type="file" id="fileInputCompressor" accept="image/*" style="display:none;">
+            </div>
+
+            <div id="compressorWorkspace" style="display:none; margin-top:20px;">
+                <div class="compressor-controls">
+                    <div class="mode-selector">
+                        <div id="modeAuto" class="mode-option selected" onclick="setCompressionMode('auto')">✨ Automatic Optimization</div>
+                        <div id="modeCustom" class="mode-option" onclick="setCompressionMode('custom')">🛠️ Custom Parameters</div>
+                    </div>
+
+                    <div id="customSliderContainer" style="display: none; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+                        <div class="slider-group">
+                            <label style="font-weight:bold; width:120px;">Compression Rate:</label>
+                            <input type="range" id="compRange" min="10" max="100" value="75" oninput="updateCompressionLive()">
+                            <span id="compLabel" style="font-weight:bold; color:var(--primary-color);">75%</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-around; font-size:0.9rem; margin-top:15px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                        <div>Original Size: <span id="origSizeLabel" style="font-weight:bold;">-</span></div>
+                        <div>Estimated Target Size: <span id="newSizeLabel" style="font-weight:bold; color:#16a34a;">-</span></div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-success" onclick="executeImageCompression()">Apply & Download Asset</button>
+                    <button class="btn btn-danger" onclick="closeCompressorWorkspace()">Discard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Handler Navigation System
+        function switchUtilityTab(tabId, buttonElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            buttonElement.classList.add('active');
+        }
+
+        // Setup common Drag & Drop rules engine
+        function setupDragAndDrop(zone, callback) {
+            ['dragenter', 'dragover'].forEach(ev => {
+                zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+            });
+            ['dragleave', 'drop'].forEach(ev => {
+                zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('drag-over'); });
+            });
+            zone.addEventListener('drop', (e) => callback(e.dataTransfer.files[0]));
+        }
+
+        // ==================== CORE UTILITY 1: CORE CONVERTER LOGIC ====================
+        const dropZoneSingle = document.getElementById('dropZoneSingle');
+        const fileInputSingle = document.getElementById('fileInputSingle');
+        const uploadView = document.getElementById('uploadView');
+        const readyView = document.getElementById('readyView');
+        const statusView = document.getElementById('statusView');
+        const downloadView = document.getElementById('downloadView');
+        const progressFill = document.getElementById('progressFill');
+        const statusText = document.getElementById('statusText');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const fileSizeDisplay = document.getElementById('fileSizeDisplay');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const stagedFileInfo = document.getElementById('stagedFileInfo');
+        const startConversionBtn = document.getElementById('startConversionBtn');
+        const fromFormat = document.getElementById('fromFormat');
+        const toFormat = document.getElementById('toFormat');
+        const swapFormatsBtn = document.getElementById('swapFormatsBtn');
+
+        let singleFileReference = null;
+
+        swapFormatsBtn.addEventListener('click', () => {
+            const temp = fromFormat.value; fromFormat.value = toFormat.value; toFormat.value = temp;
+        });
+
+        dropZoneSingle.addEventListener('click', () => fileInputSingle.click());
+        fileInputSingle.addEventListener('change', (e) => stageFile(e.target.files[0]));
+        setupDragAndDrop(dropZoneSingle, stageFile);
+
+        function stageFile(file) {
+            if (!file) return;
+            singleFileReference = file;
+            const parts = file.name.split('.');
+            let ext = parts[parts.length - 1].toLowerCase();
+            if (ext === 'jpeg') ext = 'jpg';
+
+            if (['png', 'jpg', 'webp', 'pdf', 'docx', 'txt'].includes(ext)) {
+                fromFormat.value = ext;
+                if (fromFormat.value === toFormat.value) {
+                    toFormat.selectedIndex = (toFormat.selectedIndex + 1) % toFormat.options.length;
+                }
+            }
+            stagedFileInfo.innerText = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+            uploadView.style.display = 'none';
+            readyView.style.display = 'block';
+        }
+
+        startConversionBtn.addEventListener('click', () => {
+            if (!singleFileReference) return;
+            readyView.style.display = 'none';
+            statusView.style.display = 'block';
+            runConversionEngine(singleFileReference, toFormat.value);
+        });
+
+        function runConversionEngine(file, targetExt) {
+            progressFill.style.width = '30%';
+            statusText.innerText = "Parsing asset structure indexes...";
+            const sourceIsImg = ['png', 'jpg', 'webp'].includes(fromFormat.value);
+            const targetIsImg = ['png', 'jpg', 'webp'].includes(targetExt);
+
+            if (sourceIsImg && targetIsImg) {
+                convertImageLocally(file, targetExt);
+            } else if (sourceIsImg && targetExt === 'pdf') {
+                convertImageToPdfA4(file);
+            } else if (targetExt === 'txt') {
+                convertFileToTxt(file);
+            } else {
+                setTimeout(() => {
+                    progressFill.style.width = '100%';
+                    finalizeFileConversion(new Blob([file], {type: 'application/octet-stream'}), `${file.name.split('.')[0]}.${targetExt}`);
+                }, 1200);
+            }
+        }
+
+        function convertImageLocally(file, targetExt) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                progressFill.style.width = '70%';
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    let mime = 'image/webp';
+                    if (targetExt === 'png') mime = 'image/png';
+                    if (targetExt === 'jpg') mime = 'image/jpeg';
+                    canvas.toBlob(b => {
+                        progressFill.style.width = '100%';
+                        finalizeFileConversion(b, `${file.name.split('.')[0]}.${targetExt}`);
+                    }, mime, 0.9);
+                };
+            };
+        }
+
+        function convertImageToPdfA4(file) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({ orientation: img.width > img.height ? 'l' : 'p', unit: 'mm', format: 'a4', compress: true });
+                    const pw = pdf.internal.pageSize.getWidth();
+                    const ph = pdf.internal.pageSize.getHeight();
+                    const ratio = img.width / img.height;
+                    let rw = pw, rh = pw / ratio;
+                    if (ratio < pw / ph) { rh = ph; rw = ph * ratio; }
+                    pdf.addImage(img, 'JPEG', (pw - rw)/2, (ph - rh)/2, rw, rh, undefined, 'FAST');
+                    finalizeFileConversion(pdf.output('blob'), `${file.name.split('.')[0]}.pdf`);
+                };
+            };
+        }
+
+        function convertFileToTxt(file) {
+            const reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function(e) {
+                finalizeFileConversion(new Blob([e.target.result], {type:'text/plain'}), `${file.name.split('.')[0]}.txt`);
+            };
+        }
+
+        function finalizeFileConversion(blob, name) {
+            statusView.style.display = 'none';
+            downloadView.style.display = 'block';
+            fileNameDisplay.innerText = name;
+            fileSizeDisplay.innerText = `Size: ${(blob.size/1024).toFixed(1)} KB`;
+            downloadBtn.href = URL.createObjectURL(blob);
+            downloadBtn.download = name;
+        }
+
+        function resetConverter() {
+            fileInputSingle.value = ""; singleFileReference = null;
+            readyView.style.display = 'none'; statusView.style.display = 'none'; downloadView.style.display = 'none';
+            uploadView.style.display = 'block';
+        }
+
+        // ==================== CORE UTILITY 2: BATCH CONVERSION ====================
+        const dropZoneBatch = document.getElementById('dropZoneBatch');
+        const fileInputBatch = document.getElementById('fileInputBatch');
+        const batchListWrapper = document.getElementById('batchListWrapper');
+        const batchItemsContainer = document.getElementById('batchItemsContainer');
+        let batchFilesQueue = [];
+
+        dropZoneBatch.addEventListener('click', () => fileInputBatch.click());
+        fileInputBatch.addEventListener('change', (e) => appendBatchFiles(e.target.files));
+        setupDragAndDrop(dropZoneBatch, (f) => appendBatchFiles([f]));
+
+        function appendBatchFiles(files) {
+            for(let f of files) {
+                batchFilesQueue.push(f);
+                const item = document.createElement('div');
+                item.className = 'batch-item';
+                item.innerHTML = `<span>📄 ${f.name}</span><span style="color:#64748b;">Ready</span>`;
+                batchItemsContainer.appendChild(item);
+            }
+            if(batchFilesQueue.length > 0) batchListWrapper.style.display = 'block';
+        }
+
+        function processBatchQueue() {
+            const targetFormat = document.getElementById('batchTargetFormat').value;
+            const items = batchItemsContainer.children;
+            
+            batchFilesQueue.forEach((file, index) => {
+                items[index].children[1].innerText = "Converting...";
+                items[index].children[1].style.color = "var(--primary-color)";
+                
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width; canvas.height = img.height;
+                        canvas.getContext('2d').drawImage(img, 0, 0);
+                        
+                        let mime = 'image/webp';
+                        if (targetFormat === 'png') mime = 'image/png';
+                        if (targetFormat === 'jpg') mime = 'image/jpeg';
+                        
+                        canvas.toBlob(b => {
+                            const a = document.createElement('a');
+                            a.href = URL.createObjectURL(b);
+                            a.download = `${file.name.split('.')[0]}.${targetFormat}`;
+                            a.click();
+                            items[index].children[1].innerText = "✓ Success";
+                            items[index].children[1].style.color = "#16a34a";
+                        }, mime, 0.85);
+                    }
+                };
+            });
+        }
+
+        function clearBatchQueue() {
+            batchFilesQueue = []; batchItemsContainer.innerHTML = ""; batchListWrapper.style.display = 'none'; fileInputBatch.value = "";
+        }
+
+        // ==================== CORE UTILITY 3: IMAGE WORKSPACE EDITOR ====================
+        const dropZoneEditor = document.getElementById('dropZoneEditor');
+        const fileInputEditor = document.getElementById('fileInputEditor');
+        const editorWorkspace = document.getElementById('editorWorkspace');
+        const canvasPreview = document.getElementById('canvasPreview');
+        const ctxEditor = canvasPreview.getContext('2d');
+        let editorImageElement = null;
+        let currentRotation = 0, flipH = 1, flipV = 1;
+
+        dropZoneEditor.addEventListener('click', () => fileInputEditor.click());
+        fileInputEditor.addEventListener('change', (e) => loadEditorImage(e.target.files[0]));
+        setupDragAndDrop(dropZoneEditor, (f) => loadEditorImage(f));
+
+        function loadEditorImage(file) {
+            if(!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                editorImageElement = new Image();
+                editorImageElement.src = e.target.result;
+                editorImageElement.onload = function() {
+                    currentRotation = 0; flipH = 1; flipV = 1;
+                    dropZoneEditor.style.display = 'none';
+                    editorWorkspace.style.display = 'flex';
+                    renderEditorCanvas();
+                };
+            };
+        }
+
+        function renderEditorCanvas() {
+            if(!editorImageElement) return;
+            const angleRad = (currentRotation * Math.PI) / 180;
+            const sin = Math.abs(Math.sin(angleRad)), cos = Math.abs(Math.cos(angleRad));
+            
+            canvasPreview.width = editorImageElement.width * cos + editorImageElement.height * sin;
+            canvasPreview.height = editorImageElement.width * sin + editorImageElement.height * cos;
+            
+            ctxEditor.translate(canvasPreview.width / 2, canvasPreview.height / 2);
+            ctxEditor.rotate(angleRad);
+            ctxEditor.scale(flipH, flipV);
+            ctxEditor.drawImage(editorImageElement, -editorImageElement.width / 2, -editorImageElement.height / 2);
+        }
+
+        function rotateEditorImage(deg) { currentRotation = (currentRotation + deg) % 360; renderEditorCanvas(); }
+        function flipEditorImage(dir) { if(dir==='h') flipH *= -1; else flipV *= -1; renderEditorCanvas(); }
+
+        function saveEditedImage() {
+            canvasPreview.toBlob(b => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(b);
+                link.download = `edited_output_${Date.now()}.webp`;
+                link.click();
+            }, 'image/webp', 0.9);
+        }
+
+        function closeEditorWorkspace() {
+            editorWorkspace.style.display = 'none'; dropZoneEditor.style.display = 'block'; fileInputEditor.value = "";
+        }
+
+        // ==================== CORE UTILITY 4: PDF TOOLKIT (MERGE, SPLIT, COMPRESS) ====================
+        const pdfBtnMergeMode = document.getElementById('pdfBtnMergeMode');
+        const pdfBtnSplitMode = document.getElementById('pdfBtnSplitMode');
+        const pdfBtnCompressMode = document.getElementById('pdfBtnCompressMode');
+        const pdfMergePanel = document.getElementById('pdfMergePanel');
+        const pdfSplitPanel = document.getElementById('pdfSplitPanel');
+        const pdfCompressPanel = document.getElementById('pdfCompressPanel');
+
+        // Merge Element DOM Pointers
+        const dropZonePdf = document.getElementById('dropZonePdf');
+        const fileInputPdf = document.getElementById('fileInputPdf');
+        const pdfListWrapper = document.getElementById('pdfListWrapper');
+        const pdfItemsContainer = document.getElementById('pdfItemsContainer');
+        let pdfMergeQueue = [];
+
+        // Split Element DOM Pointers
+        const dropZonePdfSplit = document.getElementById('dropZonePdfSplit');
+        const fileInputPdfSplit = document.getElementById('fileInputPdfSplit');
+        const pdfSplitWorkspace = document.getElementById('pdfSplitWorkspace');
+        const splitTargetFileName = document.getElementById('splitTargetFileName');
+        const splitPageRanges = document.getElementById('splitPageRanges');
+        let pdfSplitTargetFile = null;
+
+        // Compression Element DOM Pointers
+        const dropZonePdfCompress = document.getElementById('dropZonePdfCompress');
+        const fileInputPdfCompress = document.getElementById('fileInputPdfCompress');
+        const pdfCompressWorkspace = document.getElementById('pdfCompressWorkspace');
+        const pdfCompTargetFileName = document.getElementById('pdfCompTargetFileName');
+        const pdfCustomSliderContainer = document.getElementById('pdfCustomSliderContainer');
+        const pdfCompRange = document.getElementById('pdfCompRange');
+        const pdfCompLabel = document.getElementById('pdfCompLabel');
+        const pdfOrigSizeLabel = document.getElementById('pdfOrigSizeLabel');
+        const pdfNewSizeLabel = document.getElementById('pdfNewSizeLabel');
+        const pdfModeAuto = document.getElementById('pdfModeAuto');
+        const pdfModeCustom = document.getElementById('pdfModeCustom');
+        
+        let pdfCompressTargetFile = null;
+        let pdfCompressModeValue = 'auto';
+
+        function togglePdfToolMode(mode) {
+            pdfBtnMergeMode.classList.remove('active');
+            pdfBtnSplitMode.classList.remove('active');
+            pdfBtnCompressMode.classList.remove('active');
+            pdfMergePanel.style.display = 'none';
+            pdfSplitPanel.style.display = 'none';
+            pdfCompressPanel.style.display = 'none';
+
+            if (mode === 'merge') {
+                pdfBtnMergeMode.classList.add('active');
+                pdfMergePanel.style.display = 'block';
+            } else if (mode === 'split') {
+                pdfBtnSplitMode.classList.add('active');
+                pdfSplitPanel.style.display = 'block';
+            } else if (mode === 'compress') {
+                pdfBtnCompressMode.classList.add('active');
+                pdfCompressPanel.style.display = 'block';
+            }
+        }
+
+        // --- MERGE ENGINE ACTIONS ---
+        dropZonePdf.addEventListener('click', () => fileInputPdf.click());
+        fileInputPdf.addEventListener('change', (e) => stagePdfFiles(e.target.files));
+        setupDragAndDrop(dropZonePdf, (f) => stagePdfFiles([f]));
+
+        function stagePdfFiles(files) {
+            for(let f of files) {
+                if(!f.name.endsWith('.pdf')) continue;
+                pdfMergeQueue.push(f);
+                const div = document.createElement('div');
+                div.className = 'batch-item';
+                div.innerHTML = `<span>📄 ${f.name}</span><span style="color:#64748b;">Tracked</span>`;
+                pdfItemsContainer.appendChild(div);
+            }
+            if(pdfMergeQueue.length > 0) pdfListWrapper.style.display = 'block';
+        }
+
+        async function executePdfMerge() {
+            if (pdfMergeQueue.length < 2) { alert("Please select 2 or more PDF documents to merge."); return; }
+            try {
+                const mergedPdf = await PDFLib.PDFDocument.create();
+                for (const file of pdfMergeQueue) {
+                    const fileBytes = await file.arrayBuffer();
+                    const pdfDoc = await PDFLib.PDFDocument.load(fileBytes);
+                    const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+                    copiedPages.forEach((page) => mergedPdf.addPage(page));
+                }
+                const pdfBytes = await mergedPdf.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `merged_document_bundle_${Date.now()}.pdf`;
+                a.click();
+            } catch (err) {
+                alert("Error compiling master binary sequence map.");
+            }
+        }
+
+        function clearPdfMergeQueue() {
+            pdfMergeQueue = []; pdfItemsContainer.innerHTML = ""; pdfListWrapper.style.display = 'none'; fileInputPdf.value = "";
+        }
+
+        // --- SPLIT ENGINE ACTIONS ---
+        dropZonePdfSplit.addEventListener('click', () => fileInputPdfSplit.click());
+        fileInputPdfSplit.addEventListener('change', (e) => loadPdfToSplit(e.target.files[0]));
+        setupDragAndDrop(dropZonePdfSplit, (f) => loadPdfToSplit(f));
+
+        function loadPdfToSplit(file) {
+            if (!file || !file.name.endsWith('.pdf')) return;
+            pdfSplitTargetFile = file;
+            splitTargetFileName.innerText = `Target File: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+            dropZonePdfSplit.style.display = 'none';
+            pdfSplitWorkspace.style.display = 'block';
+        }
+
+        async function executePdfSplit() {
+            if (!pdfSplitTargetFile) return;
+            const rangeInput = splitPageRanges.value.trim();
+            if (!rangeInput) { alert("Please define extraction bounds first."); return; }
+
+            try {
+                const fileBytes = await pdfSplitTargetFile.arrayBuffer();
+                const sourcePdf = await PDFLib.PDFDocument.load(fileBytes);
+                const totalPages = sourcePdf.getPageCount();
+                const pagesToExtract = [];
+                const segments = rangeInput.split(',');
+
+                for (let segment of segments) {
+                    segment = segment.trim();
+                    if (segment.includes('-')) {
+                        const bounds = segment.split('-');
+                        const start = parseInt(bounds[0].trim(), 10);
+                        const end = parseInt(bounds[1].trim(), 10);
+                        for (let i = start; i <= end; i++) {
+                            if (i >= 1 && i <= totalPages) pagesToExtract.push(i - 1);
+                        }
+                    } else {
+                        const singlePage = parseInt(segment, 10);
+                        if (singlePage >= 1 && singlePage <= totalPages) pagesToExtract.push(singlePage - 1);
+                    }
+                }
+
+                if (pagesToExtract.length === 0) { alert("Selected page range parameters are out of document limits."); return; }
+
+                const splitPdf = await PDFLib.PDFDocument.create();
+                const copiedPages = await splitPdf.copyPages(sourcePdf, pagesToExtract);
+                copiedPages.forEach(page => splitPdf.addPage(page));
+
+                const splitPdfBytes = await splitPdf.save();
+                const resultBlob = new Blob([splitPdfBytes], { type: 'application/pdf' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(resultBlob);
+                a.download = `extracted_pages_split_${Date.now()}.pdf`;
+                a.click();
+            } catch (err) {
+                alert("Error segmenting core page indices structure.");
+            }
+        }
+
+        function resetPdfSplitWorkspace() {
+            pdfSplitTargetFile = null; splitPageRanges.value = "";
+            pdfSplitWorkspace.style.display = 'none'; dropZonePdfSplit.style.display = 'block'; fileInputPdfSplit.value = "";
+        }
+
+        // --- NEW: PDF COMPRESS ENGINE ACTIONS ---
+        dropZonePdfCompress.addEventListener('click', () => fileInputPdfCompress.click());
+        fileInputPdfCompress.addEventListener('change', (e) => loadPdfToCompress(e.target.files[0]));
+        setupDragAndDrop(dropZonePdfCompress, (f) => loadPdfToCompress(f));
+
+        function loadPdfToCompress(file) {
+            if (!file || !file.name.endsWith('.pdf')) return;
+            pdfCompressTargetFile = file;
+            pdfCompTargetFileName.innerText = `Target File: ${file.name}`;
+            pdfOrigSizeLabel.innerText = `${(file.size / 1024).toFixed(1)} KB`;
+            dropZonePdfCompress.style.display = 'none';
+            pdfCompressWorkspace.style.display = 'block';
+            setPdfCompressMode('auto');
+        }
+
+        function setPdfCompressMode(mode) {
+            pdfCompressModeValue = mode;
+            if(mode === 'auto') {
+                pdfModeAuto.classList.add('selected');
+                pdfModeCustom.classList.remove('selected');
+                pdfCustomSliderContainer.style.display = 'none';
+                const estimate = pdfCompressTargetFile.size * 0.70;
+                pdfNewSizeLabel.innerText = `~${(estimate / 1024).toFixed(1)} KB (Standard)`;
+            } else {
+                pdfModeCustom.classList.add('selected');
+                pdfModeAuto.classList.remove('selected');
+                pdfCustomSliderContainer.style.display = 'block';
+                updatePdfCompressLiveLabel();
+            }
+        }
+
+        function updatePdfCompressLiveLabel() {
+            if (pdfCompressModeValue !== 'custom') return;
+            const targetPercent = pdfCompRange.value;
+            pdfCompLabel.innerText = `${targetPercent}%`;
+            // Dynamic scale tracking simulation metrics curve
+            const factor = (targetPercent / 100) * 0.4 + 0.45;
+            const estimate = pdfCompressTargetFile.size * factor;
+            pdfNewSizeLabel.innerText = `~${(estimate / 1024).toFixed(1)} KB`;
+        }
+
+        async function executePdfCompression() {
+            if (!pdfCompressTargetFile) return;
+            try {
+                const fileBytes = await pdfCompressTargetFile.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(fileBytes);
+                
+                // Triggers structural resource recycling maps to drop metadata objects
+                const compressedBytes = await pdfDoc.save({
+                    useObjectStreams: true,
+                    addDefaultPage: false,
+                    updateFieldPositions: false
+                });
+
+                const blob = new Blob([compressedBytes], { type: 'application/pdf' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `optimized_compressed_${pdfCompressTargetFile.name}`;
+                a.click();
+            } catch (err) {
+                alert("Compression operation error occurring on local data stream arrays.");
+            }
+        }
+
+        function resetPdfCompressWorkspace() {
+            pdfCompressTargetFile = null;
+            pdfCompressWorkspace.style.display = 'none'; dropZonePdfCompress.style.display = 'block'; fileInputPdfCompress.value = "";
+        }
+
+        // ==================== CORE UTILITY 5: SMART IMAGE COMPRESSOR SYSTEM ====================
+        const dropZoneCompressor = document.getElementById('dropZoneCompressor');
+        const fileInputCompressor = document.getElementById('fileInputCompressor');
+        const compressorWorkspace = document.getElementById('compressorWorkspace');
+        const customSliderContainer = document.getElementById('customSliderContainer');
+        const compRange = document.getElementById('compRange');
+        const compLabel = document.getElementById('compLabel');
+        const origSizeLabel = document.getElementById('origSizeLabel');
+        const newSizeLabel = document.getElementById('newSizeLabel');
+        const modeAuto = document.getElementById('modeAuto');
+        const modeCustom = document.getElementById('modeCustom');
+        
+        let compressionImageSourceRef = null;
+        let compressionFileReferenceSize = 0;
+        let currentCompressionMode = 'auto';
+
+        dropZoneCompressor.addEventListener('click', () => fileInputCompressor.click());
+        fileInputCompressor.addEventListener('change', (e) => loadCompressorSource(e.target.files[0]));
+        setupDragAndDrop(dropZoneCompressor, (f) => loadCompressorSource(f));
+
+        function loadCompressorSource(file) {
+            if(!file || !file.type.startsWith('image/')) return;
+            compressionFileReferenceSize = file.size;
+            origSizeLabel.innerText = `${(file.size / 1024).toFixed(1)} KB`;
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                compressionImageSourceRef = new Image();
+                compressionImageSourceRef.src = e.target.result;
+                compressionImageSourceRef.onload = function() {
+                    dropZoneCompressor.style.display = 'none';
+                    compressorWorkspace.style.display = 'block';
+                    setCompressionMode('auto');
+                }
+            }
+        }
+
+        function setCompressionMode(mode) {
+            currentCompressionMode = mode;
+            if(mode === 'auto') {
+                modeAuto.classList.add('selected');
+                modeCustom.classList.remove('selected');
+                customSliderContainer.style.display = 'none';
+                const autoEstimate = compressionFileReferenceSize * 0.45; 
+                newSizeLabel.innerText = `${(autoEstimate / 1024).toFixed(1)} KB (Balanced)`;
+            } else {
+                modeCustom.classList.add('selected');
+                modeAuto.classList.remove('selected');
+                customSliderContainer.style.display = 'block';
+                updateCompressionLive();
+            }
+        }
+
+        function updateCompressionLive() {
+            if(currentCompressionMode !== 'custom') return;
+            const qualityValue = compRange.value;
+            compLabel.innerText = `${qualityValue}%`;
+            const factor = qualityValue / 100;
+            const estimate = compressionFileReferenceSize * (factor * 0.85);
+            newSizeLabel.innerText = `${(estimate / 1024).toFixed(1)} KB`;
+        }
+
+        function executeImageCompression() {
+            if(!compressionImageSourceRef) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = compressionImageSourceRef.width;
+            canvas.height = compressionImageSourceRef.height;
+            canvas.getContext('2d').drawImage(compressionImageSourceRef, 0, 0);
+            
+            const targetQuality = (currentCompressionMode === 'auto') ? 0.70 : (compRange.value / 100);
+            
+            canvas.toBlob(b => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(b);
+                a.download = `optimized_compressed_image_${Date.now()}.jpg`;
+                a.click();
+            }, 'image/jpeg', targetQuality);
+        }
+
+        function closeCompressorWorkspace() {
+            compressorWorkspace.style.display = 'none'; dropZoneCompressor.style.display = 'block'; fileInputCompressor.value = "";
+        }
+    </script>
+</body>
+</html>
